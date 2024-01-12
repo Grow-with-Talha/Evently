@@ -14,7 +14,14 @@ export async function createUser(user: CreateUserParams) {
   try {
     await connectToDB()
 
-    const newUser = await User.create(user)
+    const newUser = await User.create({
+      clerkId: user.clerk,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      photo: user.photo,
+    })
     return JSON.parse(JSON.stringify(newUser))
   } catch (error) {
     handleError(error)
