@@ -4,6 +4,7 @@ import { WebhookEvent } from "@clerk/nextjs/server";
 import { createUser, deleteUser, updateUser } from "@/lib/actions/user.actions";
 import { clerkClient } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
+import User from "@/lib/Database/models/user.model";
 
 export async function POST(req: Request) {
   try {
@@ -66,16 +67,33 @@ export async function POST(req: Request) {
         username,
       } = evt.data;
 
-      if (id) {
-        const user = {
-          clerkId: id,
-          email: email_addresses[0].email_address,
-          username: username!,
-          firstName: first_name,
-          lastName: last_name,
-          photo: image_url,
-        };
+      if (!id) {
+        console.error("Error: User ID is null");
+        return new Response("User ID is null", { status: 400 });
+      }
+
+      // Check if the user already exists with the same clerkId
+      const existingUser = await User.findOne({ clerkId: id });
+
+      if (existingUser) {
+        console.error("Error: User with the same clerkId already exists");
+        return new Response("User with the same clerkId already exists", {
+          status: 409,
+        });
+      }
+
+      const user = {
+        clerkId: id,
+        email: email_addresses[0].email_address,
+        username: username!,
+        firstName: first_name,
+        lastName: last_name,
+        photo: image_url,
+      };
+
+      try {
         const newUser = await createUser(user);
+
         if (newUser) {
           await clerkClient.users.updateUserMetadata(id, {
             publicMetadata: {
@@ -83,7 +101,16 @@ export async function POST(req: Request) {
             },
           });
         }
+
         return NextResponse.json({ message: "OK", user: newUser });
+      } catch (error: any) {
+        if (error.code === 11000) {
+          console.error("Duplicate key error:", error);
+          return new Response("Duplicate key error", { status: 409 });
+        } else {
+          console.error("Unhandled error:", error);
+          return new Response("Internal Server Error", { status: 500 });
+        }
       }
     }
 
