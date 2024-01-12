@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { connectToDB } from '@/lib/Database'
+import {  connectToDB } from '@/lib/Database'
 import User from '@/lib/Database/models/user.model'
 import Order from '@/lib/Database/models/order.model'
 import Event from '@/lib/Database/models/event.model'
@@ -14,14 +14,7 @@ export async function createUser(user: CreateUserParams) {
   try {
     await connectToDB()
 
-    const newUser = await User.create({
-      clerkId: user.clerk,
-      email: user.email,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      photo: user.photo,
-    })
+    const newUser = await User.create(user)
     return JSON.parse(JSON.stringify(newUser))
   } catch (error) {
     handleError(error)
