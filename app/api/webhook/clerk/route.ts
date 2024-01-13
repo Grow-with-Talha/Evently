@@ -56,12 +56,13 @@ export async function POST(req: Request) {
   const eventType = evt.type;
 
   if (eventType === "user.created") {
-  const { id, email_addresses, username, first_name, last_name, image_url, } = evt?.data!;
-  console.log("id from route.ts",evt.data.id)
+    const { id, email_addresses, username, first_name, last_name, image_url } =
+      evt?.data!;
+    console.log("id from route.ts", evt.data.id);
     const user = {
       clerkId: id,
       email: email_addresses[0].email_address,
-      username:username!,
+      username: username!,
       firstName: first_name,
       lastName: last_name,
       photo: image_url,
