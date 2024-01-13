@@ -24,8 +24,9 @@ export async function createUser({
     if (clerkId === null) {
       return console.log("clerkid is null");
     }   else {
+      console.log(clerkId)
       const newUser = await User.create({
-        clerkID: clerkId,
+        clerkId: clerkId,
         username: username,
         firstName: firstName,
         lastName: lastName,
